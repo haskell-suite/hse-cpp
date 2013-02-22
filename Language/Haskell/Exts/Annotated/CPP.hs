@@ -40,6 +40,6 @@ defaultCpphsOptions =
   { boolopts = (boolopts Orig.defaultCpphsOptions)
       { locations = False
       , stripC89 = True
-      , stripEol = True
+      , stripEol = False
       }
   }
