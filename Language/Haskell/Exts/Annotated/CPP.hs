@@ -24,7 +24,8 @@ parseFileContentsWithComments cppopts p@(ParseMode fn exts ign _ _) rawStr =
             allExts = impliesExts $ case (ign, readExtensions md) of
                                      (False,Just es) -> exts ++ es
                                      _               -> exts
-         in parseModuleWithComments (p { extensions = allExts }) <$> cpp cppopts p md
+            p' = p { extensions = allExts }
+         in parseModuleWithComments p' <$> cpp cppopts p' md
 
 cpp cppopts p str
   | CPP `elem` extensions p
