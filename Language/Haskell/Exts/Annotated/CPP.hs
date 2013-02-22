@@ -16,7 +16,7 @@ import Control.Applicative
 import Data.List
 
 parseFileWithComments ::  CpphsOptions -> ParseMode -> FilePath -> IO (ParseResult (Module SrcSpanInfo, [Comment]))
-parseFileWithComments cppopts p fp = readFile fp >>= parseFileContentsWithComments cppopts p
+parseFileWithComments cppopts p fp = readFile fp >>= parseFileContentsWithComments cppopts p { parseFilename = fp }
 
 parseFileContentsWithComments :: CpphsOptions -> ParseMode -> String -> IO (ParseResult (Module SrcSpanInfo, [Comment]))
 parseFileContentsWithComments cppopts p@(ParseMode fn exts ign _ _) rawStr =
