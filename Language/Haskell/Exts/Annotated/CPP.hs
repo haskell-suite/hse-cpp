@@ -24,9 +24,12 @@ parseFileContentsWithComments cppopts p@(ParseMode fn exts ign _ _) rawStr =
             allExts = impliesExts $ case (ign, readExtensions md) of
                                      (False,Just es) -> exts ++ es
                                      _               -> exts
-         in parseModuleWithComments (p { extensions = allExts }) <$> runCpphs cppopts fn md
+         in parseModuleWithComments (p { extensions = allExts }) <$> cpp cppopts p md
 
-cpp cppopts str = runCpphs cppopts str
+cpp cppopts p str
+  | CPP `elem` extensions p
+  = runCpphs cppopts (parseFilename p) str
+  | otherwise = return str
 
 delit :: String -> String -> String
 delit fn = if ".lhs" `isSuffixOf` fn then unlit fn else id
