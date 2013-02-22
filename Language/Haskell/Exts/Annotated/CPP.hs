@@ -1,9 +1,13 @@
 module Language.Haskell.Exts.Annotated.CPP
   ( parseFileWithComments
   , parseFileContentsWithComments
+  , defaultCpphsOptions
+  , CpphsOptions(..)
+  , BoolOptions(..)
   ) where
 
-import Language.Preprocessor.Cpphs
+import qualified Language.Preprocessor.Cpphs as Orig
+import Language.Preprocessor.Cpphs hiding (defaultCpphsOptions)
 import Language.Preprocessor.Unlit
 import Language.Haskell.Exts (ParseMode(..))
 import Language.Haskell.Exts.Annotated
@@ -26,3 +30,12 @@ cpp cppopts str = runCpphs cppopts str
 
 delit :: String -> String -> String
 delit fn = if ".lhs" `isSuffixOf` fn then unlit fn else id
+
+defaultCpphsOptions =
+  Orig.defaultCpphsOptions
+  { boolopts = (boolopts Orig.defaultCpphsOptions)
+      { locations = False
+      , stripC89 = True
+      , stripEol = True
+      }
+  }
