@@ -38,8 +38,9 @@ delit fn = if ".lhs" `isSuffixOf` fn then unlit fn else id
 defaultCpphsOptions =
   Orig.defaultCpphsOptions
   { boolopts = (boolopts Orig.defaultCpphsOptions)
-      { locations = False
+      { locations = True
       , stripC89 = True
       , stripEol = False
+      , hashline = False
       }
   }
