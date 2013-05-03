@@ -1,33 +1,47 @@
 module Language.Haskell.Exts.Annotated.CPP
-  ( parseFileWithComments
-  , parseFileContentsWithComments
+  ( parseFileWithCommentsAndCPP
+  , parseFileContentsWithCommentsAndCPP
   , defaultCpphsOptions
   , CpphsOptions(..)
   , BoolOptions(..)
   ) where
+
+import qualified Debug.Trace as Debug
 
 import qualified Language.Preprocessor.Cpphs as Orig
 import Language.Preprocessor.Cpphs hiding (defaultCpphsOptions)
 import Language.Preprocessor.Unlit
 import Language.Haskell.Exts (ParseMode(..))
 import Language.Haskell.Exts.Annotated
-  hiding (parseFileWithComments, parseFileContentsWithComments)
 import Control.Applicative
 import Data.List
 
-parseFileWithComments ::  CpphsOptions -> ParseMode -> FilePath -> IO (ParseResult (Module SrcSpanInfo, [Comment]))
-parseFileWithComments cppopts p fp = readFile fp >>= parseFileContentsWithComments cppopts p { parseFilename = fp }
+parseFileWithCommentsAndCPP ::  CpphsOptions -> ParseMode -> FilePath
+                      -> IO (ParseResult (Module SrcSpanInfo, [Comment]))
+parseFileWithCommentsAndCPP cppopts parseMode0 file = do
+    content <- readFile file
+    parseFileContentsWithCommentsAndCPP cppopts parseMode content
+  where
+    parseMode = parseMode0 { parseFilename = file }
 
-parseFileContentsWithComments :: CpphsOptions -> ParseMode -> String -> IO (ParseResult (Module SrcSpanInfo, [Comment]))
-parseFileContentsWithComments cppopts p@(ParseMode fn exts ign _ _) rawStr =
-        let md = delit fn rawStr
-            allExts = impliesExts $ case (ign, readExtensions md) of
-                                     (False,Just es) -> exts ++ es
-                                     _               -> exts
-            p' = p { extensions = allExts }
-         in parseModuleWithComments p' <$> cpp cppopts p' md
+parseFileContentsWithCommentsAndCPP
+    :: CpphsOptions -> ParseMode -> String
+    -> IO (ParseResult (Module SrcSpanInfo, [Comment]))
+parseFileContentsWithCommentsAndCPP cppopts p@(ParseMode fn exts ign _ _) rawStr = do
+    let md = delit fn rawStr
+        allExts = impliesExts $ case (ign, readExtensions md) of
+                                 (False,Just es) -> exts ++ es
+                                 _               -> exts
+        p' = p { extensions = allExts
+               , ignoreLanguagePragmas = False
+               }
+    print $ ignoreLanguagePragmas p
+    processedSrc <- cpp cppopts p' md
+    putStrLn processedSrc
+    return $ parseFileContentsWithComments p' processedSrc
 
 cpp cppopts p str
+  | Debug.trace (show $ extensions p) False = undefined
   | CPP `elem` extensions p
   = runCpphs cppopts (parseFilename p) str
   | otherwise = return str
