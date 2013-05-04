@@ -6,8 +6,6 @@ module Language.Haskell.Exts.Annotated.CPP
   , BoolOptions(..)
   ) where
 
-import qualified Debug.Trace as Debug
-
 import qualified Language.Preprocessor.Cpphs as Orig
 import Language.Preprocessor.Cpphs hiding (defaultCpphsOptions)
 import Language.Preprocessor.Unlit
@@ -35,14 +33,11 @@ parseFileContentsWithCommentsAndCPP cppopts p@(ParseMode fn exts ign _ _) rawStr
         p' = p { extensions = allExts
                , ignoreLanguagePragmas = False
                }
-    print $ ignoreLanguagePragmas p
     processedSrc <- cpp cppopts p' md
-    putStrLn processedSrc
     return $ parseFileContentsWithComments p' processedSrc
 
 cpp cppopts p str
-  | Debug.trace (show $ extensions p) False = undefined
-  | CPP `elem` extensions p
+  | CPP `elem` impliesExts (toExtensionList (baseLanguage p) (extensions p))
   = runCpphs cppopts (parseFilename p) str
   | otherwise = return str
 
