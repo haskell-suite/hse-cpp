@@ -30,7 +30,6 @@ parseFileContentsWithCommentsAndCPP cppopts p rawStr = do
         md = delit filename rawStr
         cppMode = updateExtensions p md
     processedSrc <- cpp cppopts cppMode md
-    putStrLn processedSrc
     let finalMode = updateExtensions cppMode processedSrc
     return $ parseModuleWithComments finalMode processedSrc
 
