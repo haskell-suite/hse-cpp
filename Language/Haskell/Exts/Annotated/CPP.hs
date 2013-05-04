@@ -28,19 +28,25 @@ parseFileContentsWithCommentsAndCPP
 parseFileContentsWithCommentsAndCPP cppopts p rawStr = do
     let filename = parseFilename p
         md = delit filename rawStr
-        exts = extensions p
-        oldLang = baseLanguage p
-        (bLang, extraExts) =
-            case (ignoreLanguagePragmas p, readExtensions md) of
-              (False, Just (mLang, es)) ->
-                   (case mLang of {Nothing -> oldLang;Just newLang -> newLang}, es)
-              _ -> (oldLang, [])
-        p' = p { extensions = exts ++ extraExts
-               , ignoreLanguagePragmas = False
-               , baseLanguage = bLang
-               }
-    processedSrc <- cpp cppopts p' md
-    return $ parseFileContentsWithComments p' processedSrc
+        cppMode = updateExtensions p md
+    processedSrc <- cpp cppopts cppMode md
+    putStrLn processedSrc
+    let finalMode = updateExtensions cppMode processedSrc
+    return $ parseModuleWithComments finalMode processedSrc
+
+updateExtensions :: ParseMode -> String -> ParseMode
+updateExtensions p mod =
+  let oldLang = baseLanguage p
+      exts = extensions p
+      (bLang, extraExts) =
+          case (ignoreLanguagePragmas p, readExtensions mod) of
+            (False, Just (mLang, es)) ->
+                 (case mLang of {Nothing -> oldLang;Just newLang -> newLang}, es)
+            _ -> (oldLang, [])
+  in p { extensions = exts ++ extraExts
+       , ignoreLanguagePragmas = False
+       , baseLanguage = bLang
+       }
 
 cpp cppopts p str
   | CPP `elem` impliesExts (toExtensionList (baseLanguage p) (extensions p))
