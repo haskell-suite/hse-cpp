@@ -17,5 +17,7 @@ cabal-version:       >=1.10
 library
   exposed-modules:     Language.Haskell.Exts.Annotated.CPP
   -- other-modules:       
-  build-depends:       base, cpphs, haskell-src-exts
+  build-depends:       base
+                     , cpphs
+                     , haskell-src-exts >= 1.14
   default-language:    Haskell2010

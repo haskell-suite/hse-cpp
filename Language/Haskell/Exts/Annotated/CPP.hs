@@ -25,13 +25,19 @@ parseFileWithCommentsAndCPP cppopts parseMode0 file = do
 parseFileContentsWithCommentsAndCPP
     :: CpphsOptions -> ParseMode -> String
     -> IO (ParseResult (Module SrcSpanInfo, [Comment]))
-parseFileContentsWithCommentsAndCPP cppopts p@(ParseMode fn exts ign _ _) rawStr = do
-    let md = delit fn rawStr
-        allExts = impliesExts $ case (ign, readExtensions md) of
-                                 (False,Just es) -> exts ++ es
-                                 _               -> exts
-        p' = p { extensions = allExts
+parseFileContentsWithCommentsAndCPP cppopts p rawStr = do
+    let filename = parseFilename p
+        md = delit filename rawStr
+        exts = extensions p
+        oldLang = baseLanguage p
+        (bLang, extraExts) =
+            case (ignoreLanguagePragmas p, readExtensions md) of
+              (False, Just (mLang, es)) ->
+                   (case mLang of {Nothing -> oldLang;Just newLang -> newLang}, es)
+              _ -> (oldLang, [])
+        p' = p { extensions = exts ++ extraExts
                , ignoreLanguagePragmas = False
+               , baseLanguage = bLang
                }
     processedSrc <- cpp cppopts p' md
     return $ parseFileContentsWithComments p' processedSrc
