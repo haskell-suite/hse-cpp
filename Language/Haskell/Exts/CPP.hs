@@ -1,4 +1,4 @@
-module Language.Haskell.Exts.Annotated.CPP
+module Language.Haskell.Exts.CPP
   ( parseFileWithCommentsAndCPP
   , parseFileContentsWithCommentsAndCPP
   , defaultCpphsOptions
@@ -9,8 +9,7 @@ module Language.Haskell.Exts.Annotated.CPP
 import qualified Language.Preprocessor.Cpphs as Orig
 import Language.Preprocessor.Cpphs hiding (defaultCpphsOptions)
 import Language.Preprocessor.Unlit
-import Language.Haskell.Exts (ParseMode(..))
-import Language.Haskell.Exts.Annotated
+import Language.Haskell.Exts
 import Control.Applicative
 import Data.List
 
