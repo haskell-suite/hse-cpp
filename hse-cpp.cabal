@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                hse-cpp
-version:             0.1
+version:             0.2
 synopsis:            Preprocess+parse haskell code
 -- description:
 license:             MIT
